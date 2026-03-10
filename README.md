@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Life in Weeks</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+    .animate-pulse { animation: pulse 2s cubic-bezier(.4,0,.6,1) infinite; }
+  </style>
+</head>
+<body class="min-h-screen bg-gray-50 p-6 pt-16">
+  <div class="max-w-md mx-auto" id="app"></div>
+
+  <script>
+    const t = {
+      pageTitle: "Life in Weeks",
+      pageSubtitle: "A simple visualization to reflect on the passage of time",
+      birthDateQuestion: "Enter your birthdate",
+      visualizeButton: "Visualize your time",
+      startOverButton: "Start over",
+      lifeInWeeksTitle: "Your life in weeks",
+      legendPast: "Past", legendPresent: "Present", legendFuture: "Future",
+      lifeHighlightsTitle: "Life highlights",
+      societalContextTitle: "Societal context",
+      cosmicPerspectiveTitle: "Cosmic perspective",
+      naturalWorldTitle: "Natural world",
+    };
+
+    const fmt = n => new Intl.NumberFormat().format(n);
+
+    function calcStats(dateStr) {
+      const birth = new Date(dateStr), now = new Date();
+      const msW = 1000*60*60*24*7, msD = 1000*60*60*24;
+      const weeksLived = Math.floor((now - birth) / msW);
+      const daysLived  = Math.floor((now - birth) / msD);
+      const totalWeeks = 4160;
+      return {
+        weeksLived, daysLived, totalWeeks,
+        weeksRemaining: totalWeeks - weeksLived,
+        percentageLived: Math.round(weeksLived / totalWeeks * 100),
+        hoursSlept: Math.floor(daysLived * 8),
+        heartbeats: Math.floor(daysLived * 24 * 60 * 70),
+        breaths: Math.floor(daysLived * 24 * 60 * 16),
+        seasons: Math.floor(daysLived / 91.25),
+        birthYear: birth.getFullYear(),
+        yearsLived: Math.floor(daysLived / 365.25),
+        lunarCycles: Math.round(daysLived / 29.53),
+      };
+    }
+
+    function popAtYear(year) {
+      const data = {1950:2.5,1960:3,1970:3.7,1980:4.4,1990:5.3,2000:6.1,2010:6.9,2020:7.8,2025:8.1};
+      const yrs = Object.keys(data).map(Number);
+      const closest = yrs.reduce((a,b) => Math.abs(b-year)<Math.abs(a-year)?b:a);
+      return Math.round(data[closest]*1e9);
+    }
+
+    let stats = null;
+
+    function renderInput() {
+      return `
+        <h1 class="text-2xl font-normal text-gray-800 mb-2">${t.pageTitle}</h1>
+        <p class="text-gray-600 mb-8">${t.pageSubtitle}</p>
+        <div class="bg-white p-6 rounded-md shadow-sm">
+          <h2 class="text-lg font-normal mb-4 text-gray-800">${t.birthDateQuestion}</h2>
+          <input type="date" id="dob" class="w-full p-2 border border-gray-300 rounded-md mb-4 text-gray-800"/>
+          <button onclick="onVisualize()" class="w-full bg-gray-800 text-white py-2 rounded-md hover:bg-gray-700 transition-colors">
+            ${t.visualizeButton}
+          </button>
+        </div>`;
+    }
+
+    function renderGrid(s) {
+      const weeksPerRow = 52, totalRows = Math.ceil(s.totalWeeks / weeksPerRow);
+      let rows = '';
+      for (let r = 0; r < totalRows; r++) {
+        let cells = '';
+        for (let c = 0; c < weeksPerRow; c++) {
+          const w = r * weeksPerRow + c;
+          if (w >= s.totalWeeks) break;
+          const cls = w < s.weeksLived ? 'bg-gray-800' : w === s.weeksLived ? 'bg-blue-500 animate-pulse' : 'bg-gray-200';
+          const label = w < s.weeksLived ? 'Past week' : w === s.weeksLived ? 'Current week' : 'Future week';
+          cells += `<div class="w-2 h-2 m-0.5 rounded-sm ${cls}" title="Week ${w+1}: ${label}"></div>`;
+        }
+        rows += `<div class="flex">${cells}</div>`;
+      }
+      return `
+        <div class="mt-8 bg-white p-6 rounded-md shadow-sm">
+          <h2 class="text-lg font-normal mb-4 text-gray-800">${t.lifeInWeeksTitle}</h2>
+          <div class="flex flex-col overflow-x-auto">${rows}</div>
+          <div class="flex mt-6 text-sm gap-4">
+            <div class="flex items-center gap-2"><div class="w-3 h-3 bg-gray-800"></div><span class="text-gray-600">${t.legendPast}</span></div>
+            <div class="flex items-center gap-2"><div class="w-3 h-3 bg-blue-500"></div><span class="text-gray-600">${t.legendPresent}</span></div>
+            <div class="flex items-center gap-2"><div class="w-3 h-3 bg-gray-200 border border-gray-300"></div><span class="text-gray-600">${t.legendFuture}</span></div>
+          </div>
+        </div>`;
+    }
+
+    function card(title, rows) {
+      const items = rows.map(r => `<p class="text-gray-600">${r}</p>`).join('');
+      return `<div class="bg-white p-6 rounded-md shadow-sm"><h2 class="text-lg font-normal mb-4 text-gray-800">${title}</h2><div class="space-y-4">${items}</div></div>`;
+    }
+
+    function hi(n) { return `<span class="text-gray-900 font-medium">${n}</span>`; }
+
+    function renderStats(s) {
+      const highlights = card(t.lifeHighlightsTitle, [
+        `You've lived ${hi(fmt(s.weeksLived))} weeks — ${hi(s.percentageLived+'%')} of an 80-year life.`,
+        `That's ${hi(fmt(s.daysLived))} days and approximately ${hi(fmt(s.seasons))} seasons.`,
+        `Your heart has beaten roughly ${hi(fmt(s.heartbeats))} times.`,
+        `You've taken ~${hi(fmt(s.breaths))} breaths and slept about ${hi(fmt(s.hoursSlept))} hours.`,
+      ]);
+      const societal = card(t.societalContextTitle, [
+        `Since your birth, world population has grown from ${hi(fmt(popAtYear(s.birthYear)))} to over ${hi('8 billion')}.`,
+        `The average person meets ~80,000 people in a lifetime. You've likely met ~${hi(fmt(Math.round(80000*(s.percentageLived/100))))}.`,
+        `Since your birth: ~${hi(fmt(s.daysLived*385000))} births and ~${hi(fmt(s.daysLived*166000))} deaths worldwide.`,
+      ]);
+      const cosmic = card(t.cosmicPerspectiveTitle, [
+        `Earth has traveled ~${hi(fmt(Math.round(s.daysLived*1.6e6)))} km around the Sun since you were born.`,
+        `Your entire lifespan is just ${hi((80/13800000000*100).toFixed(10)+'%')} of the universe's age.`,
+        `Our solar system moved ~${hi(fmt(Math.round(s.daysLived*24*828000)))} km through the Milky Way during your life.`,
+      ]);
+      const natural = card(t.naturalWorldTitle, [
+        `You've experienced ~${hi(fmt(s.lunarCycles))} lunar cycles and ${hi(s.yearsLived)} trips around the Sun.`,
+        `A giant sequoia can live 3,000 years. Your age is ${hi(((s.yearsLived/3000)*100).toFixed(2)+'%')} of that.`,
+        `Your body has replaced most of its cells several times. You're not made of the same atoms you were born with.`,
+      ]);
+      return `<div class="mt-8 space-y-6">${highlights}${societal}${cosmic}${natural}</div>
+        <button onclick="onReset()" class="mt-8 w-full bg-gray-200 text-gray-800 py-2 rounded-md hover:bg-gray-300 transition-colors">${t.startOverButton}</button>`;
+    }
+
+    function render() {
+      const app = document.getElementById('app');
+      if (!stats) {
+        app.innerHTML = renderInput();
+      } else {
+        app.innerHTML = `
+          <h1 class="text-2xl font-normal text-gray-800 mb-2">${t.pageTitle}</h1>
+          <p class="text-gray-600 mb-2">${t.pageSubtitle}</p>
+          ${renderGrid(stats)}${renderStats(stats)}`;
+      }
+    }
+
+    function onVisualize() {
+      const val = document.getElementById('dob').value;
+      if (!val) return;
+      stats = calcStats(val);
+      render();
+    }
+
+    function onReset() {
+      stats = null;
+      render();
+    }
+
+    render();
+  </script>
+</body>
+</html>
