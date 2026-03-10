@@ -1,5 +1,28 @@
-<html>
-  <body>
-<iframe src="https://claude.site/public/artifacts/cae5af37-27cf-4231-8b8c-a00cc86a6f2c/embed" title="Claude Artifact" width="100%" height="600" frameborder="0" allow="clipboard-write" allowfullscreen></iframe>
-  </body>
-</html>
+# 🗓️ Life in Weeks
+
+A simple visual tool to reflect on the passage of time — inspired by the idea that a human life is about 4,160 weeks long.
+
+## 🔗 Live Demo
+
+👉 **[Click here to try it](https://princekumarsingh06.github.io/life-in-weeks/)**
+
+## ✨ Features
+
+- Visual grid of your entire life in weeks
+- Highlights past, present, and future weeks
+- Fun stats: heartbeats, breaths, lunar cycles, cosmic distances & more
+- No install needed — pure HTML, works in any browser
+
+## 🚀 How to Use
+
+1. Open the live demo link above
+1. Enter your birthdate
+1. See your life visualized!
+
+## 🛠️ Run Locally
+
+Just download `index.html` and open it in your browser. That’s it!
+
+-----
+
+Made with ❤️ by [PrincekumarSingh06](https://github.com/PrincekumarSingh06)
