@@ -4,7 +4,7 @@ A simple visual tool to reflect on the passage of time — inspired by the idea 
 
 ## 🔗 Live Demo
 
-👉 **[Click here to try it](https://princekumarsingh06.github.io/life-in-weeks/)**
+👉 **[Click here to try it](https://github.com/PrincekumarSingh06/life-in-weeks)**
 
 ## ✨ Features
 
